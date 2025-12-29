@@ -1,38 +1,12 @@
-import { Schema, model, Types } from "mongoose";
+import { Schema, model } from "mongoose";
 
-interface Task {
-  title: string;
-  description: string;
-  status: string;
-  user: Types.ObjectId;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-const TaskSchema = new Schema<Task>(
+const TaskSchema = new Schema(
   {
-    title: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    status: {
-      type: String,
-      required: true,
-      enum: ["todo", "doing", "done"],
-    },
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
+    title: String,
+    description: String,
+    status: String,
   },
-  {
-    timestamps: true, // 👈 cria createdAt e updatedAt automaticamente
-  }
+  { timestamps: true }
 );
 
-export default model<Task>("Task", TaskSchema);
+export default model("Task", TaskSchema);

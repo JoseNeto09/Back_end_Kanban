@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
-import authRoutes from "./routes/auth.routes";
+//import authRoutes from "./routes/auth.routes";
 import taskRoutes from "./routes/task.routes";
 
 dotenv.config();
@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
 });
 
 // 🔗 CONECTANDO AS ROTAS AQUI
-app.use("/auth", authRoutes);
+//app.use("/auth", authRoutes);
 app.use("/tasks", taskRoutes);
 
 // MongoDB

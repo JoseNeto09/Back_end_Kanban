@@ -6,7 +6,6 @@ import Task from "../Models/Task";
 ========================= */
 export async function createTask(req: Request, res: Response) {
   const { title, description, status } = req.body;
-  const userId = (req as any).userId;
 
   if (
     typeof title !== "string" ||
@@ -16,15 +15,10 @@ export async function createTask(req: Request, res: Response) {
     return res.status(400).json({ error: "Dados inválidos" });
   }
 
-  if (!userId) {
-    return res.status(401).json({ error: "Usuário não autenticado" });
-  }
-
   const task = await Task.create({
     title,
     description,
     status,
-    user: userId,
   });
 
   return res.status(201).json(task);
@@ -34,16 +28,7 @@ export async function createTask(req: Request, res: Response) {
    LIST TASKS
 ========================= */
 export async function listTasks(req: Request, res: Response) {
-  const userId = (req as any).userId;
-
-  if (!userId) {
-    return res.status(401).json({ error: "Usuário não autenticado" });
-  }
-
-  const tasks = await Task.find({ user: userId }).sort({
-    createdAt: -1,
-  });
-
+  const tasks = await Task.find().sort({ createdAt: -1 });
   return res.json(tasks);
 }
 
@@ -53,14 +38,9 @@ export async function listTasks(req: Request, res: Response) {
 export async function updateTask(req: Request, res: Response) {
   const { id } = req.params;
   const { title, description, status } = req.body;
-  const userId = (req as any).userId;
 
-  if (!userId) {
-    return res.status(401).json({ error: "Usuário não autenticado" });
-  }
-
-  const task = await Task.findOneAndUpdate(
-    { _id: id, user: userId },
+  const task = await Task.findByIdAndUpdate(
+    id,
     { title, description, status },
     { new: true }
   );
@@ -77,16 +57,8 @@ export async function updateTask(req: Request, res: Response) {
 ========================= */
 export async function deleteTask(req: Request, res: Response) {
   const { id } = req.params;
-  const userId = (req as any).userId;
 
-  if (!userId) {
-    return res.status(401).json({ error: "Usuário não autenticado" });
-  }
-
-  const task = await Task.findOneAndDelete({
-    _id: id,
-    user: userId,
-  });
+  const task = await Task.findByIdAndDelete(id);
 
   if (!task) {
     return res.status(404).json({ error: "Tarefa não encontrada" });
