@@ -25,7 +25,7 @@ const connectDB = async () => {
   }
 };
 
-// Middleware para garantir conexão antes de cada requisição
+// Middleware para garantir conexão
 app.use(async (req, res, next) => {
   await connectDB();
   next();
