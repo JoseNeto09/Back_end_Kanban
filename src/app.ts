@@ -2,7 +2,9 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import swaggerUi from "swagger-ui-express";
 import taskRoutes from "./routes/task.routes";
+import { swaggerSpec } from "./config/swagger";
 
 dotenv.config();
 
@@ -10,6 +12,12 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'API Kanban - Documentação'
+}));
 
 // Conexão MongoDB otimizada para Vercel
 let isConnected = false;
@@ -47,7 +55,10 @@ app.use(async (req, res, next) => {
 
 // Rota teste
 app.get("/", (req, res) => {
-  res.json({ status: "API Kanban rodando 🚀" });
+  res.json({ 
+    status: "API Kanban rodando 🚀",
+    documentation: "/api-docs"
+  });
 });
 
 // Rotas
