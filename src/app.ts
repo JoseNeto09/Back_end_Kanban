@@ -10,7 +10,13 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+// CORS configurado para aceitar requisições do frontend
+app.use(cors({
+  origin: '*', // Em produção, especifique o domínio do frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 // Swagger UI
@@ -57,11 +63,48 @@ app.use(async (req, res, next) => {
 app.get("/", (req, res) => {
   res.json({ 
     status: "API Kanban rodando 🚀",
-    documentation: "/api-docs"
+    documentation: "/api-docs",
+    endpoints: {
+      tasks: "/tasks",
+      docs: "/api-docs",
+      health: "/health"
+    }
   });
+});
+
+// Rota de health check
+app.get("/health", async (req, res) => {
+  try {
+    const dbStatus = mongoose.connection.readyState === 1;
+    let tasksCount = 0;
+    
+    if (dbStatus && mongoose.connection.db) {
+      tasksCount = await mongoose.connection.db.collection('tasks').countDocuments();
+    }
+    
+    res.json({ 
+      status: "OK",
+      database: dbStatus ? "conectado" : "desconectado",
+      tasksCount 
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "ERROR",
+      error: error instanceof Error ? error.message : "Erro desconhecido"
+    });
+  }
 });
 
 // Rotas
 app.use("/tasks", taskRoutes);
+
+// Tratamento de rotas não encontradas
+app.use((req, res) => {
+  res.status(404).json({ 
+    error: "Rota não encontrada",
+    path: req.path,
+    method: req.method
+  });
+});
 
 export default app;

@@ -4,62 +4,71 @@ import Task from "../Models/Task";
 /* =========================
    CREATE TASK
 ========================= */
-export async function createTask(req: Request, res: Response) {
+export const createTask = async (req: Request, res: Response) => {
   try {
-    const { title, description, status } = req.body;
+    const { title, description, status, priority } = req.body;
 
-    if (
-      typeof title !== "string" ||
-      typeof description !== "string" ||
-      typeof status !== "string"
-    ) {
-      return res.status(400).json({ error: "Dados inválidos" });
+    if (!title || typeof title !== "string") {
+      return res.status(400).json({ error: "Título é obrigatório" });
     }
 
     const task = await Task.create({
       title,
       description,
       status,
+      priority,
     });
 
     return res.status(201).json(task);
   } catch (error) {
     console.error("Erro ao criar task:", error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: "Erro ao criar tarefa",
       details: error instanceof Error ? error.message : "Erro desconhecido"
     });
   }
-}
+};
 
 /* =========================
    LIST TASKS
 ========================= */
-export async function listTasks(req: Request, res: Response) {
+export const listTasks = async (req: Request, res: Response) => {
   try {
+    console.log("📋 Iniciando listagem de tasks...");
+    
     const tasks = await Task.find().sort({ createdAt: -1 });
-    return res.json(tasks);
+    
+    console.log(`✅ ${tasks.length} tasks encontradas`);
+    
+    return res.status(200).json(tasks);
   } catch (error) {
-    console.error("Erro ao listar tasks:", error);
-    return res.status(500).json({ 
+    console.error("❌ Erro ao listar tasks:", error);
+    return res.status(500).json({
       error: "Erro ao buscar tarefas",
       details: error instanceof Error ? error.message : "Erro desconhecido"
     });
   }
-}
+};
 
 /* =========================
    UPDATE TASK
 ========================= */
-export async function updateTask(req: Request, res: Response) {
+export const updateTask = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, description, status } = req.body;
+    const { title, description, status, priority } = req.body;
+
+    const updateData: any = {};
+    
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (status !== undefined) updateData.status = status;
+    if (priority !== undefined) updateData.priority = priority;
 
     const task = await Task.findByIdAndUpdate(
       id,
-      { title, description, status },
-      { new: true }
+      updateData,
+      { new: true, runValidators: true }
     );
 
     if (!task) {
@@ -69,17 +78,17 @@ export async function updateTask(req: Request, res: Response) {
     return res.json(task);
   } catch (error) {
     console.error("Erro ao atualizar task:", error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: "Erro ao atualizar tarefa",
       details: error instanceof Error ? error.message : "Erro desconhecido"
     });
   }
-}
+};
 
 /* =========================
    DELETE TASK
 ========================= */
-export async function deleteTask(req: Request, res: Response) {
+export const deleteTask = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -89,12 +98,11 @@ export async function deleteTask(req: Request, res: Response) {
       return res.status(404).json({ error: "Tarefa não encontrada" });
     }
 
-    return res.status(204).send();
+    return res.status(200).json({ message: "Tarefa removida com sucesso" });
   } catch (error) {
     console.error("Erro ao deletar task:", error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: "Erro ao deletar tarefa",
-      details: error instanceof Error ? error.message : "Erro desconhecido"
     });
   }
-}
+};
